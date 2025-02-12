@@ -6,7 +6,7 @@ const Button = ({title,id,rightIcon, leftIcon, containerClass}) => {
   return (
    <button id={id} className={`group relative z-10 w-fit border cursor-pointer rounded-full overflow-hidden bg-violet-50 
    px-7 py-3 text-black ${containerClass}`}>
-    {leftIcon}
+    {leftIcon} 
     
     <span className='relative inline-flex overflow-hidden text-xs uppercase'>
         <div>
@@ -14,6 +14,7 @@ const Button = ({title,id,rightIcon, leftIcon, containerClass}) => {
         {title}
         </div>
         </span>
+      {rightIcon}
     </button>
   )
 }
