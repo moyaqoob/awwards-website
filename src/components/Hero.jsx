@@ -4,6 +4,9 @@ import Button from "./Button";
 import {FaLocationArrow} from "react-icons/fa"
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
+import { ScrollTrigger } from "gsap/all";
+
+gsap.registerPlugin(ScrollTrigger)
 const Hero = () => {
   const [currentIndex, setCurrentIndex] = useState(1);
   const [hasClicked, setHasClicked] = useState(false);
@@ -26,6 +29,11 @@ const Hero = () => {
     setCurrentIndex((prevIndex) => (prevIndex % totalVideos) + 1);
   };
 
+  useEffect(()=>{
+    if(loadedVideos === totalVideos-1){
+        setLoading(false);
+    }
+  },[loadedVideos])
   useGSAP(()=>{
     if(hasClicked){
       gsap.set("#next-video",{visibility:'visible'});
@@ -51,9 +59,20 @@ const Hero = () => {
   },{dependencies:[currentIndex],revertOnUpdate:true})
 
   useGSAP(()=>{
-    gsap.set('#video-frame',{
-      clipPath: 'polygon(0 0,100% 0,95% 93%,7% 93%)',
-      
+    gsap.set("#video-frame",{
+      clipPath:'polygon(14% 0, 72% 0%,90% 90%, 0% 100%)',
+      borderRadius:'0 0 40% 10%'
+    })
+
+    gsap.from("#video-frame",{
+      clipPath:'polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)',
+      borderRadius:'0 0 0 0',
+      ease:'power1.inOut',
+      scrollTrigger:{
+        trigger:"#video-frame",
+        start:"center center",
+        scrub:true
+      }
     })
   })
 
@@ -61,6 +80,16 @@ const Hero = () => {
 
   return (
     <div className="relative h-dvh w-screen overflow-x-hidden">
+      {loading && (
+        <div className="flex-center absolute z-[100] h-dvh w-screen overflow-hidden bg-violet-50">
+          <div className="three-body">
+              <div className="three-body__dot"></div>
+              <div className="three-body__dot"></div>
+              <div className="three-body__dot"></div>
+          </div>
+        </div>
+      )}
+
       <div
         id="video-frame"
         className="relative z-10 h-dvh w-screen overflow-hidden rounded-lg bg-blue-75"
@@ -105,7 +134,7 @@ const Hero = () => {
             onLoadedData={handleVideoLoad}
           />
         </div>
-        <h1 className="special-font hero-heading absolute bottom-5 right-5 text-blue-75">
+        <h1 className="special-font hero-heading absolute bottom-5 z-40 right-5 text-blue-75">
             G<b>a</b>ming 
         </h1>
 
