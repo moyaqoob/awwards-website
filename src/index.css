@@ -10,6 +10,10 @@ body {
   background-color: #dfdff0;
   font-family: "General Sans", sans-serif;
 }
+/* If using custom CSS */
+
+
+
 
 @layer base {
   @font-face {
@@ -88,7 +92,7 @@ body {
     @apply special-font font-zentry text-black opacity-0;
     transform: translate3d(10px, 51px, -60px) rotateY(60deg) rotateX(-40deg);
     transform-origin: 50% 50% -150px !important;
-    will-change: opacity, transform;
+    will-change: opacity, transform,;
   }
 
   .bento-tilt_1 {
