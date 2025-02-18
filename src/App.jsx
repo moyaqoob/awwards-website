@@ -1,11 +1,12 @@
-import React from 'react';
-import Navbar from '@/Components/Navbar.jsx';
-import Hero from '@/Components/Hero.jsx';
-import Section from '@/Components/Section.jsx';
-import Features from '@/Components/Features.jsx';
-import Story from '@/Components/Story.jsx';
-import Contact from '@/Components/Contact.jsx'
-import Footer from '@/Components/Footer.jsx';
+
+
+import Navbar from './components/Navbar';
+import Hero from './components/Hero';
+import Section from './components/Section';
+import Features from './components/Features';
+import Story from './components/Story';
+import Contact from './components/Contact';
+import Footer from './components/Footer';
 
 function App() {
   return (
