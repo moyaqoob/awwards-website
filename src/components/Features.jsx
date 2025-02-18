@@ -1,7 +1,5 @@
 import React from 'react'
-import AnimatedTitle from './AnimatedTitle'
 import { useState } from 'react'
-import gsap from 'gsap'
 import { useRef } from 'react'
 const Features = () => {
 
@@ -18,7 +16,7 @@ const Features = () => {
             const tiltX = (relativeY - 0.5) *10;
             const tiltY = (relativeX - 0.5) *-10;
 
-            setTransformStyle(`perspective(500px) rotateX(${tiltX}deg) rotateY(${tiltX}deg) scale3d(0.95,0.95,0.95)`)
+            setTransformStyle(`perspective(500px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) scale3d(0.95,0.95,0.95)`)
         }
 
         const handleMouseLeave = ()=>{
