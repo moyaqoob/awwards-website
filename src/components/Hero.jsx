@@ -1,49 +1,48 @@
-import { useEffect, useRef, useState } from "react";
-import React from "react";
-import Button from "./Button";
-import {FaLocationArrow} from "react-icons/fa"
-import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/all";
+import { useEffect, useRef, useState } from "react";
+import { FaLocationArrow } from "react-icons/fa";
+import Button from "./Button";
 
-gsap.registerPlugin(ScrollTrigger)
+gsap.registerPlugin(ScrollTrigger);
 
 const Hero = () => {
   const [loading, setLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(1);
   const [videosLoaded, setVideosLoaded] = useState(new Set());
   const [preloadedVideos, setPreloadedVideos] = useState({});
-  
+  const [isSwitching, setIsSwitching] = useState(false);
+
   const currentVideoRef = useRef(null);
   const nextVideoRef = useRef(null);
   const miniVideoRef = useRef(null);
-  
+
   const totalVideos = 4;
 
   // Preload videos progressively
   useEffect(() => {
     const preloadVideo = (index) => {
       return new Promise((resolve, reject) => {
-        const video = document.createElement('video');
+        const video = document.createElement("video");
         video.src = getVideoSrc(index);
-        video.preload = 'metadata'; // Only load metadata first
+        video.preload = "metadata"; // Only load metadata first
         video.muted = true;
-        
+
         const onCanPlay = () => {
-          video.removeEventListener('canplaythrough', onCanPlay);
-          video.removeEventListener('error', onError);
+          video.removeEventListener("canplaythrough", onCanPlay);
+          video.removeEventListener("error", onError);
           resolve({ index, video });
         };
-        
+
         const onError = () => {
-          video.removeEventListener('canplaythrough', onCanPlay);
-          video.removeEventListener('error', onError);
+          video.removeEventListener("canplaythrough", onCanPlay);
+          video.removeEventListener("error", onError);
           reject(new Error(`Failed to load video ${index}`));
         };
-        
-        video.addEventListener('canplaythrough', onCanPlay);
-        video.addEventListener('error', onError);
-        
+
+        video.addEventListener("canplaythrough", onCanPlay);
+        video.addEventListener("error", onError);
+
         // Start loading
         video.load();
       });
@@ -54,24 +53,27 @@ const Hero = () => {
       try {
         // Load current video first
         const firstVideo = await preloadVideo(currentIndex);
-        setPreloadedVideos(prev => ({ ...prev, [currentIndex]: firstVideo.video }));
-        setVideosLoaded(prev => new Set([...prev, currentIndex]));
+        setPreloadedVideos((prev) => ({
+          ...prev,
+          [currentIndex]: firstVideo.video,
+        }));
+        setVideosLoaded((prev) => new Set([...prev, currentIndex]));
         setLoading(false); // Allow user interaction as soon as first video is ready
-        
+
         // Load remaining videos in background
         for (let i = 1; i <= totalVideos; i++) {
           if (i !== currentIndex) {
             try {
               const video = await preloadVideo(i);
-              setPreloadedVideos(prev => ({ ...prev, [i]: video.video }));
-              setVideosLoaded(prev => new Set([...prev, i]));
+              setPreloadedVideos((prev) => ({ ...prev, [i]: video.video }));
+              setVideosLoaded((prev) => new Set([...prev, i]));
             } catch (error) {
               console.warn(`Failed to preload video ${i}:`, error);
             }
           }
         }
       } catch (error) {
-        console.error('Failed to load initial video:', error);
+        console.error("Failed to load initial video:", error);
         setLoading(false); // Show content even if video fails
       }
     };
@@ -85,16 +87,38 @@ const Hero = () => {
   };
 
   const handleMiniVdClick = () => {
+    // Immediate video switch
     const nextIndex = (currentIndex % totalVideos) + 1;
-    
-    if (videosLoaded.has(nextIndex)) {
-      setCurrentIndex(nextIndex);
-      
-      // Preload next video if not already loaded
-      const preloadNext = ((nextIndex % totalVideos) + 1);
-      if (!videosLoaded.has(preloadNext)) {
-        // Trigger preload of next video
-      }
+    setIsSwitching(true);
+
+    // Switch videos immediately
+    setCurrentIndex(nextIndex);
+
+    // Play the next video immediately if it's loaded
+    if (nextVideoRef.current) {
+      nextVideoRef.current
+        .play()
+        .then(() => {
+          setIsSwitching(false);
+        })
+        .catch((error) => {
+          console.warn("Video playback failed:", error);
+          setIsSwitching(false);
+        });
+    }
+
+    // Preload next video in background without blocking
+    const preloadNext = (nextIndex % totalVideos) + 1;
+    if (!videosLoaded.has(preloadNext)) {
+      preloadVideo(preloadNext)
+        .then((result) => {
+          setPreloadedVideos((prev) => ({
+            ...prev,
+            [preloadNext]: result.video,
+          }));
+          setVideosLoaded((prev) => new Set([...prev, preloadNext]));
+        })
+        .catch(console.warn);
     }
   };
 
@@ -125,22 +149,17 @@ const Hero = () => {
           <div className="mask-clip-path absolute-center absolute z-50 size-64 cursor-pointer overflow-hidden rounded-lg">
             <div
               onClick={handleMiniVdClick}
-              className="origin-center scale-50 opacity-0 transition-all duration-500 ease-in hover:scale-100 hover:opacity-100"
+              className={`origin-center transition-all duration-500 ease-in hover:scale-100 hover:opacity-100 
+                ${isSwitching ? "opacity-50" : "opacity-0 scale-50"}`}
             >
-              {preloadedVideos[(currentIndex % totalVideos) + 1] ? (
-                <video
-                  ref={miniVideoRef}
-                  src={getVideoSrc((currentIndex % totalVideos) + 1)}
-                  loop
-                  muted
-                  className="size-64 origin-center scale-150 object-cover object-center"
-                  preload="metadata"
-                />
-              ) : (
-                <div className="size-64 bg-gray-300 animate-pulse flex items-center justify-center">
-                  <span className="text-gray-500">Loading...</span>
-                </div>
-              )}
+              <video
+                ref={miniVideoRef}
+                src={getVideoSrc((currentIndex % totalVideos) + 1)}
+                loop
+                muted
+                className="size-64 origin-center scale-150 object-cover object-center"
+                playsInline
+              />
             </div>
           </div>
 
@@ -158,10 +177,14 @@ const Hero = () => {
           )}
 
           {/* Main Background Video */}
-          {preloadedVideos[currentIndex === totalVideos - 1 ? 1 : currentIndex] ? (
+          {preloadedVideos[
+            currentIndex === totalVideos - 1 ? 1 : currentIndex
+          ] ? (
             <video
               ref={currentVideoRef}
-              src={getVideoSrc(currentIndex === totalVideos - 1 ? 1 : currentIndex)}
+              src={getVideoSrc(
+                currentIndex === totalVideos - 1 ? 1 : currentIndex
+              )}
               autoPlay
               loop
               muted
