@@ -1,12 +1,11 @@
-
-
-import Navbar from './components/Navbar';
-import Hero from './components/Hero';
-import Section from './components/Section';
-import Features from './components/Features';
-import Story from './components/Story';
-import Contact from './components/Contact';
-import Footer from './components/Footer';
+// @ts-nocheck
+import Navbar from './Components/Navbar';
+import Hero from './Components/Hero';
+import Section from './Components/Section';
+import Features from './Components/Features';
+import Story from './Components/Story';
+import Contact from './Components/Contact';
+import Footer from './Components/Footer';
 
 function App() {
   return (
